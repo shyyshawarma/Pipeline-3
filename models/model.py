@@ -586,20 +586,30 @@ class UIR_PolyKernel(nn.Module):
         out_enc_level1 = self.encoder_level1(inp)
         inp_enc_level2 = self.down1_2(out_enc_level1)
         out_enc_level2 = self.encoder_level2(inp_enc_level2)
-        inp_enc_level3 = self.down2_3(out_enc_level2)
+        aha1_output = self.attention_lka1_to_lka2(out_enc_level2)
+        inp_enc_level3 = self.down2_3(aha1_output)
         out_enc_level3 = self.encoder_level3(inp_enc_level3)
-        latent = self.bottleneck(out_enc_level3)
+        aha2_output = self.attention_lka2_to_csc(out_enc_level3)
+        latent = self.bottleneck(aha2_output)
 
         out_enc_level3 = self.eca_level3(out_enc_level3)
         out_enc_level2 = self.eca_level2(out_enc_level2)
         out_enc_level1 = self.eca_level1(out_enc_level1)
+        out_eca_aha1= self.eca_atteention_lka1_to_lka2(aha1_output)
+        out_eca_aha2 = self.eca_atteention_lka2_to_csc(aha2_output)
 
-        inp_dec_level3 = cat(latent, out_enc_level3)
+        first_decode = cat(latent, out_eca_aha2)
+        aha_input=self.reduce_before_aha(first_decode)
+        aha_input = self.attention_csc_to_lka2(aha_input)
+        inp_dec_level3 = cat(aha_input, out_enc_level3)
         inp_dec_level3 = self.reduce_chan_level3(inp_dec_level3)
         out_dec_level3 = self.decoder_level3(inp_dec_level3)
 
         inp_dec_level2 = self.up3_2(out_dec_level3)
-        inp_dec_level2 = cat(inp_dec_level2, out_enc_level2)
+        aha2_input = cat(inp_dec_level2, out_eca_aha1)
+        aha2_input = self.reduce_before_aha2(aha2_input)
+        aha2_input = self.attention_lka2_to_lka1(aha2_input)
+        inp_dec_level2 = cat(aha2_input, out_enc_level2)
         inp_dec_level2 = self.reduce_chan_level2(inp_dec_level2)
         out_dec_level2 = self.decoder_level2(inp_dec_level2)
 
@@ -607,17 +617,10 @@ class UIR_PolyKernel(nn.Module):
         inp_dec_level1 = cat(inp_dec_level1, out_enc_level1)
         inp_dec_level1 = self.reduce_chan_level1(inp_dec_level1)
         out_dec_level1 = self.decoder_level1(inp_dec_level1)
-        
-        conv = self.start_conv(x)
-        Residual_block1 = self.Residual_block(conv)
-        Residual_block2 = self.Residual_block(Residual_block1)
-        Residual_block3 = self.Residual_block(Residual_block2)
-        Residual_block4 = self.Residual_block(Residual_block3)
-        Residual_block5 = self.Residual_block(Residual_block4)
-        Residual_block5 = conv + Residual_block5
-        result2 = self.final_conv_drb(Residual_block5)
 
-        return self.norm(self.final_conv(out_dec_level1) + result2)
+
+      
+        return self.norm(self.final_conv(out_dec_level1) + x)
 
 
 if __name__ == '__main__':
