@@ -20,8 +20,8 @@ TRAINING:
   WEIGHT: ''
   PS_W: 256
   PS_H: 256
-  TRAIN_DIR: 'dataset/train' # path to training data
-  VAL_DIR: 'dataset/val'     # path to validation data
+  TRAIN_DIR: 'uieb+lsui+euvp/train' # path to training data
+  VAL_DIR: 'uieb+lsui+euvp/val'     # path to validation data
   SAVE_DIR: 'results/models/save'          # path to save models and images
   ORI: False
   LOG_FILE: 'results/logs.json'
