@@ -151,9 +151,7 @@ def train():
                     "Charbonnier",
                     "Perceptual",
                     "Gradient",
-                    "MS-SSIM",
-                    "Color Constancy",
-                    "Color Dispersion"
+                    "MS-SSIM"
                 ]
                 print("\n🔍 Loss Weights after epoch {}:".format(epoch))
                 for name, val in zip(loss_names, current_weights):
