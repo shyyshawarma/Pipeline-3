@@ -144,7 +144,7 @@ def train():
 
         scheduler_b.step()
 
-         if isinstance(loss_fn, CompositeLoss):
+        if isinstance(loss_fn, CompositeLoss):
             with torch.no_grad():
                 current_weights = loss_fn.softmax(loss_fn.weights).cpu().numpy()
                 loss_names = [
